@@ -9,6 +9,7 @@ jobs:
     name: 'Versioning'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions-ecosystem/action-get-latest-tag@v1
         id: get-latest-tag
       - uses: actions/github-script@v6
@@ -19,19 +20,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: '👋 Thanks for reporting! ${{ steps.get-latest-tag.outputs.tag }}'
-            })
-    
-  comment:
-    name: Comment
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Comment
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '👋 Thanks for reporting!'
             })
