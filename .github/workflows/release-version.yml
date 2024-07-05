@@ -22,9 +22,19 @@ jobs:
         COMBINED_MESSAGES=$(echo "$COMMITS" | jq -r '.[].commit.message' | paste -sd ' ')
         echo "COMBINED_MESSAGES=$COMBINED_MESSAGES" >> $GITHUB_ENV
 
-    - name: Display combined commit messages
+    - name: Set release type based on commit messages
+      id: set_release_type
       run: |
-        echo "$COMBINED_MESSAGES"
+        if echo "${{ env.COMBINED_MESSAGES }}" | grep -q "feat"; then
+          echo "RELEASE_TYPE=major" >> $GITHUB_ENV
+        elif echo "${{ env.COMBINED_MESSAGES }}" | grep -q "fix"; then
+          echo "RELEASE_TYPE=minor" >> $GITHUB_ENV
+        else
+          echo "RELEASE_TYPE=patch" >> $GITHUB_ENV
+
+    - name: Display release type
+      run: |
+        echo "The determined release type is ${{ env.RELEASE_TYPE }}"
     # steps:
     #   - name: Checkout
     #     uses: actions/checkout@v2
