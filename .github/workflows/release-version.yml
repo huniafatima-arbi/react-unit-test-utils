@@ -9,23 +9,39 @@ jobs:
     name: Versioning
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ env.GITHUB_SHA }}
-      - name: Output commit message 
-        id: get-commit-messages
-        run: echo "HEAD_COMMIT_MESSAGE=$(git show -s --format=%s)" >> "$GITHUB_OUTPUT"
-      - name: Get latest tag
-        uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
-      - name: Script to comment on PR
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '👋 Thanks for reporting! ${{ steps.get-latest-tag.outputs.tag }} ${{ github.event.workflow_run.head_commit.message }}'
-            })
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Get PR commits
+      id: get_commits
+      run: |
+        PR_NUMBER=${{ github.event.pull_request.number }}
+        COMMITS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+                        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                        "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/commits")
+        echo "$COMMITS" | jq -r '.[].commit.message' > commit_messages.txt
+
+    - name: Display commit messages
+      run: |
+        cat commit_messages.txt
+    # steps:
+    #   - name: Checkout
+    #     uses: actions/checkout@v2
+    #     with:
+    #       ref: ${{ env.GITHUB_SHA }}
+    #   - name: Output commit message 
+    #     id: get-commit-messages
+    #     run: echo "HEAD_COMMIT_MESSAGE=$(git show -s --format=%s)" >> "$GITHUB_OUTPUT"
+    #   - name: Get latest tag
+    #     uses: actions-ecosystem/action-get-latest-tag@v1
+    #     id: get-latest-tag
+    #   - name: Script to comment on PR
+    #     uses: actions/github-script@v6
+    #     with:
+    #       script: |
+    #         github.rest.issues.createComment({
+    #           issue_number: context.issue.number,
+    #           owner: context.repo.owner,
+    #           repo: context.repo.repo,
+    #           body: '👋 Thanks for reporting! ${{ steps.get-latest-tag.outputs.tag }} ${{ github.event.workflow_run.head_commit.message }}'
+    #         })
