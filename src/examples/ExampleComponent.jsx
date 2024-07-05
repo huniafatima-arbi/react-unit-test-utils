@@ -20,6 +20,7 @@ export const ExampleComponent = () => {
     handleFileInputChange,
     formAction,
   } = useExampleComponentData();
+
   const { formatMessage } = useIntl();
   return (
     <>
