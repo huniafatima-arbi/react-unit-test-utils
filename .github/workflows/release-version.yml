@@ -1,0 +1,15 @@
+name: Determine Release Version
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  comment:
+    name: Comment
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Comment
+        uses: actions/github-script@v6
+        with:
+          message: "THIS IS THE MESSAGE"
