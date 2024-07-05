@@ -22,7 +22,7 @@ export const ExampleComponent = () => {
   } = useExampleComponentData();
 
   const { formatMessage } = useIntl();
-  console.log('Test Console')
+  console.log('Test Console');
   return (
     <>
       <Form action={formAction} method="post">
