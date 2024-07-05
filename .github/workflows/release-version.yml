@@ -19,11 +19,12 @@ jobs:
         COMMITS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
                         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                         "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/commits")
-        echo "commits_list=$(echo "$COMMITS" | jq -r '.[].commit.message')" >> $GITHUB_OUTPUT
+        COMBINED_MESSAGES=$(echo "$COMMITS" | jq -r '.[].commit.message' | paste -sd ' ')
+        echo "COMBINED_MESSAGES=$COMBINED_MESSAGES" >> $GITHUB_ENV
 
-    - name: Display commit messages
+    - name: Display combined commit messages
       run: |
-        echo ${{steps.get_commits.commits_list}}
+        echo "$COMBINED_MESSAGES"
     # steps:
     #   - name: Checkout
     #     uses: actions/checkout@v2
