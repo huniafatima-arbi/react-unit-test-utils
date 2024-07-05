@@ -15,19 +15,18 @@ jobs:
     - name: Get PR commits
       id: get_commits
       run: |
-        PR_NUMBER=${{ github.event.pull_request.number }}
-        COMMITS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+        LATEST_COMMIT=$(curl -s -H "Accept: application/vnd.github.v3+json" \
                         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                        "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/commits")
-        COMBINED_MESSAGES=$(echo "$COMMITS" | jq -r '.[].commit.message' | paste -sd ' ')
-        echo "COMBINED_MESSAGES=$COMBINED_MESSAGES" >> $GITHUB_ENV
+                        "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits" \
+                        | jq -r '.[-1].commit.message')
+        echo "LATEST_COMMIT=$LATEST_COMMIT" >> $GITHUB_ENV
 
-    - name: Set release type based on commit messages
+    - name: Set release type based on latest commit message
       id: set_release_type
       run: |
-        if echo "${{ env.COMBINED_MESSAGES }}" | grep -q "feat"; then
+        if echo "${{ env.LATEST_COMMIT }}" | grep -q "feat"; then
           echo "RELEASE_TYPE=major" >> $GITHUB_ENV
-        elif echo "${{ env.COMBINED_MESSAGES }}" | grep -q "fix"; then
+        elif echo "${{ env.LATEST_COMMIT }}" | grep -q "fix"; then
           echo "RELEASE_TYPE=minor" >> $GITHUB_ENV
         else
           echo "RELEASE_TYPE=patch" >> $GITHUB_ENV
